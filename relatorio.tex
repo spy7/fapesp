@@ -1,0 +1,286 @@
+\documentclass[12pt]{report}
+
+\usepackage[a4paper]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[english, portuguese]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{indentfirst}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{tikz}
+\usepackage{tikz-3dplot}
+\usepackage[shading]{moeptikz}
+\usepackage[format=plain, labelfont=it, textfont=it]{caption}
+\usepackage{etoolbox}
+\apptocmd{\sloppy}{\hbadness 10000\relax}{}{}
+\usetikzlibrary{calc, positioning, shapes, shapes.geometric}
+
+% Variables
+\title{Plataforma de big data público de mapeamento de indícios de irregularidade nas compras públicas, comparação municipal e efetividade dos gastos públicos}
+\author{Carlos André Sanches de Souza}
+
+\makeatletter
+	\let\titulo\@title
+	\let\autor\@author
+\makeatother
+
+\newcommand{\responsavel}{Lucas Madureira dos Anjos}
+\newcommand{\instituicao}{Gedanken Desenvolvimento e Licenciamento de Programas de Computador Ltda.}
+\newcommand{\instituicaoSigla}{Gedanken}
+\newcommand{\fomento}{Fundação de Amparo à Pesquisa do Estado de São Paulo}
+\newcommand{\fomentoSigla}{FAPESP}
+\newcommand{\relatorio}{Relatório Individual Sintético}
+\newcommand{\projetoModalidade}{Treinamento Técnico}
+\newcommand{\projetoNivel}{V}
+\newcommand{\projetoSigla}{TT-V}
+\newcommand{\projetoNumero}{2019/25945-4}
+\newcommand{\projetoVinculado}{2019/00804-9}
+\newcommand{\periodoVigencia}{01/05/2020 a 30/09/2021}
+\newcommand{\periodoRelatorio}{01 de maio de 2020 a 20 de setembro de 2020}
+\newcommand{\cidade}{Ribeirão Preto}
+\addto{\captionsportuguese}{%
+  \renewcommand{\bibname}{Referências}
+}
+
+% Settings
+\def\maketitle{
+	\begin{center}
+		{\Large \relatorio\ de \projetoModalidade}\\[0.5cm]
+		{\large Bolsista: \autor}\\
+		{\large Coordenador: \responsavel}
+	\end{center}
+}
+
+\usepackage{etoolbox} 
+\makeatletter 
+\patchcmd{\chapter}{\if@openright\cleardoublepage\else\clearpage\fi}{}{}{} 
+\makeatother 
+
+\titleformat{\chapter}[hang] 
+{\normalfont\Large\bfseries\singlespace}{\thechapter.}{4mm}{} 
+
+\titleformat{\section}[hang] 
+{\normalfont\large\bfseries\singlespace}{\thesection.}{4mm}{} 
+
+\titlespacing*{\chapter}{0pt}{15pt}{15pt}
+
+\linespread{1.5}
+
+% Image symbols
+\makeatletter
+\pgfkeys{/pgf/.cd,
+  parallelepiped offset x/.initial=2mm,
+  parallelepiped offset y/.initial=2mm
+}
+\pgfdeclareshape{parallelepiped}
+{
+  \inheritsavedanchors[from=rectangle] % this is nearly a rectangle
+  \inheritanchorborder[from=rectangle]
+  \inheritanchor[from=rectangle]{north}
+  \inheritanchor[from=rectangle]{north west}
+  \inheritanchor[from=rectangle]{north east}
+  \inheritanchor[from=rectangle]{center}
+  \inheritanchor[from=rectangle]{west}
+  \inheritanchor[from=rectangle]{east}
+  \inheritanchor[from=rectangle]{mid}
+  \inheritanchor[from=rectangle]{mid west}
+  \inheritanchor[from=rectangle]{mid east}
+  \inheritanchor[from=rectangle]{base}
+  \inheritanchor[from=rectangle]{base west}
+  \inheritanchor[from=rectangle]{base east}
+  \inheritanchor[from=rectangle]{south}
+  \inheritanchor[from=rectangle]{south west}
+  \inheritanchor[from=rectangle]{south east}
+  \backgroundpath{
+    % store lower right in xa/ya and upper right in xb/yb
+    \southwest \pgf@xa=\pgf@x \pgf@ya=\pgf@y
+    \northeast \pgf@xb=\pgf@x \pgf@yb=\pgf@y
+    \pgfmathsetlength\pgfutil@tempdima{\pgfkeysvalueof{/pgf/parallelepiped
+      offset x}}
+    \pgfmathsetlength\pgfutil@tempdimb{\pgfkeysvalueof{/pgf/parallelepiped
+      offset y}}
+    \def\ppd@offset{\pgfpoint{\pgfutil@tempdima}{\pgfutil@tempdimb}}
+    \pgfpathmoveto{\pgfqpoint{\pgf@xa}{\pgf@ya}}
+    \pgfpathlineto{\pgfqpoint{\pgf@xb}{\pgf@ya}}
+    \pgfpathlineto{\pgfqpoint{\pgf@xb}{\pgf@yb}}
+    \pgfpathlineto{\pgfqpoint{\pgf@xa}{\pgf@yb}}
+    \pgfpathclose
+    \pgfpathmoveto{\pgfqpoint{\pgf@xb}{\pgf@ya}}
+    \pgfpathlineto{\pgfpointadd{\pgfpoint{\pgf@xb}{\pgf@ya}}{\ppd@offset}}
+    \pgfpathlineto{\pgfpointadd{\pgfpoint{\pgf@xb}{\pgf@yb}}{\ppd@offset}}
+    \pgfpathlineto{\pgfpointadd{\pgfpoint{\pgf@xa}{\pgf@yb}}{\ppd@offset}}
+    \pgfpathlineto{\pgfqpoint{\pgf@xa}{\pgf@yb}}
+    \pgfpathmoveto{\pgfqpoint{\pgf@xb}{\pgf@yb}}
+    \pgfpathlineto{\pgfpointadd{\pgfpoint{\pgf@xb}{\pgf@yb}}{\ppd@offset}}
+  }
+}
+\makeatother
+
+\tikzset{
+  ports/.style={
+    line width=0.3pt,
+    top color=gray!20,
+    bottom color=gray!80
+  },
+  server/.style={
+    parallelepiped,
+    fill=white,
+    draw,
+    minimum width=0.35cm,
+    minimum height=0.75cm,
+    parallelepiped offset x=2.5mm,
+    parallelepiped offset y=2mm,
+    path picture={
+      \draw[top color=gray!5,bottom color=gray!40]
+      (path picture bounding box.south west) rectangle 
+      (path picture bounding box.north east);
+      \coordinate (A-center) at ($(path picture bounding box.center)!0!(path
+        picture bounding box.south)$);
+      \coordinate (A-east) at ([xshift=-0.525cm]path picture bounding box.east);
+      \draw[ports]([yshift=0.1cm]$(A-east)!-0.065!(A-center)$)
+        rectangle +(0.2,0.065);
+      \draw[ports]([yshift=0.01cm]$(A-east)!0.06!(A-center)$)
+        rectangle +(0.15,0.05);
+      \fill[black]([yshift=-0.35cm]$(A-east)!-0.1!(A-center)$)
+        rectangle +(0.235,0.0175);
+      \fill[black]([yshift=-0.385cm]$(A-east)!-0.1!(A-center)$)
+        rectangle +(0.235,0.0175);
+      \fill[black]([yshift=-0.42cm]$(A-east)!-0.1!(A-center)$)
+        rectangle +(0.235,0.0175);
+    }  
+  },
+  database/.style={
+    cylinder,
+    font=\scriptsize,
+    shape border rotate=90,
+    minimum height=1.5cm,  
+    text width=1.4cm, 
+    align=center,      
+    aspect=0.25,
+    draw
+  },
+  api/.style={
+    rectangle,
+    font=\scriptsize,
+    text width=0.3cm,
+    minimum width=0.6cm, 
+    minimum height=2cm,  
+    align=center,    
+    draw
+  }
+}
+
+% Document
+\begin{document}
+
+\maketitle
+
+\chapter{Introdução}
+\label{chp:introducao} 
+Este documento é o relatório individual sintético do bolsista \autor\ referente ao \projetoModalidade\ (nível \projetoNivel , processo número \projetoNumero) realizado de \periodoRelatorio , sob a coordenação do pesquisador \responsavel. O \projetoModalidade\ foi realizado em apoio ao projeto de pesquisa "\titulo"\ (processo número \projetoVinculado), financiado pela \fomentoSigla.
+
+-- O bolsista participou do desenvolvimento de um novo software para a segmentação dos vasos sangüíneos de imagens de retina, escrito em C++; cuidou da manutenção e suporte de uma versão anterior do software, que havia sido feita em linguagem Matlab durante seu Mestrado; e colaborou em trabalhos com outros pesquisadores, principalmente o Prof. Dr. Herbert F. Jelinek, da australiana Charles Sturt University e o oftalmologista Marcelo B. M. Mendonça, pós-graduando da UFPE, que têm interesse no uso dos softwares e ajudaram a validar os métodos desenvolvidos.
+
+Durante seu Mestrado, o bolsista tinha produzido avanços significativos no método de segmentação de vasos sangüíneos baseado em wavelets e classificadores estatísticos [4,6]. Um protótipo de software de segmentação incluindo uma interface gráfica foi implementado na linguagem Matlab durante o Mestrado. A Bolsa de Treinamento Técnico apoiou a implementação de um novo software de segmentação de vasos sangüíneos, contando com métodos já consolidados de bom desempenho. O novo software foi escrito em C++, apresentando tempos menores de processamento e, ao contrário da versão anterior (que necessitava do uso do Matlab), pode ser usado sem a necessidade de licenças. Encontra-se disponível no portal do projeto (http://retina.iv.fapesp.br), sob a licença GPL.
+
+A análise automatizada das imagens de retina, com especial atenção à estrutura vascular, permitirá uma triagem mais abrangente de pacientes diabéticos para a detecção da retinopatia diabética (RD). Com isso, espera-se aumentar a taxa de detecção precoce da doença, o que previne perdas visuais na grande maioria dos casos, tornando possıveis intervenções médicas [3, 7]. O software desenvolvido representa um esforço para a construção de uma ferramenta de auxılio diagnóstico na triagem para a RD, de grande importância para a saúde pública.
+
+-- O objetivo desta bolsa de Treinamento Técnico TT-5 é pesquisar e desenvolver, sob supervisão e treinamento de pesquisador \responsavel , novos robôs de mapeamento de indício de irregularidade com cruzamento dos dados já presentes no banco de dados e dos novos dados extraídos. A bolsa também tem como objetivo o desenvolvimento de algoritmos de correlação dos dados, a organização dos novos dados extraídos para o banco de dados e a criação de APIs para serem consumidas nas pesquisas e nos desenvolvimento de novos robôs de mapeamento de irregularidade. Terá como responsabilidade também a criação de redes sociais (neurais) para identificar relacionamento entre pessoas e empresa, além do desenvolvimento de novos módulos de efetividade dos gastos públicos e de tratamento dos indícios de irregularidade mapeados.
+
+\chapter{Atividades realizadas}
+\label{chp:realizacoes}
+O bolsista vem realizando os trabalhos conforme foram propostos inicialmente pelo programa. Ao mesmo tempo, o bolsista vem buscando novas metodologias para melhorar a qualidade das implementações, dos dados e da forma de trabalho que deverá resultar em sistemas mais sólidos e dados mais confiáveis.
+
+\section{Tratamento de dados da Receita Federal}
+Foram coletados dados públicos mais recentes pelo site da Receita Federal \cite{receita}. Os dados foram armazenados localmente em um banco de dados PostgreSQL \cite{postgresql} e novas tabelas foram geradas a partir das originais.
+
+Dentre as tabelas geradas, podemos destacar a tabela de documentos, que reune em uma única tabela todos os CPFs e CNPJs encontrados nos dados públicos, permitindo consultas rápidas a todos os dados, e a tabela de sociedade, que traz o relacionamento entre empresas e sócios com as informações mais relevantes como data de entrada e percentual de participação.
+
+Este tratamento envolvendo a criação de tabelas e índices trará um alto ganho de performance nas consultas realizadas pelo sistema atual, principalmente nas consultas realizadas pelos robôs de indentificação de irregularidades que precisam capturar e analisar dados de diversas fontes.
+
+Todo o tratamento realizado está sendo documentado e armazenado na forma de scripts nas linguagens Python \cite{python} e SQL para que possa ser reproduzido futuramente com a disponibilização de novos dados públicos.
+
+\section{Criação de API para os dados tratados}
+Foi desenvolvida uma API \cite{api} utilizando o framework Django \cite{django} em conjunto com o framework de criação de APIs chamado Django Rest Framework \cite{drf}. Esta API carrega os dados públicos que já foram tratados e armazenados em banco de dados e os disponibilizam através de endpoints (endereços URL para cada serviço) específicos para serem acessados por outras aplicações clientes.
+
+A utilização da API permite controlar o acesso aos dados através de autenticação e filtros de acordo com o tipo de usuário conectado. Os dados são analisados, calculados e agrupados para cada serviço oferecido e disponibilizados ao cliente no formato JSON \cite{json}.
+
+O bolsista trabalhou em contato com a equipe de desenvolvimento da aplicação que irá consumir os dados enviados pela API, fornecendo suporte e adaptando a saída de dados de acordo com a necessidade da aplicação.
+
+% \vspace{\baselineskip}
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[>=stealth]
+\node[database] (db1) at (0,0) {Banco de dados};
+\node[server, right=3cm of db1, scale=1.5, label={[font=\scriptsize,align=center]south:servidor\\[-1mm]web}] (srv1) {};
+\node[api, right=0.8cm of srv1] (api1) {A P I};
+\node[notebook, right=5cm of api1,label={[font=\scriptsize,align=center]south:aplicação},yshift=-2mm] (nb1) {};
+\draw[->] (db1) -- node[midway,above,font=\scriptsize]{dados tratados} (srv1);
+\draw[<-] ($(api1)+(0.3,0)$) -- node[near start,above,font=\scriptsize]{requisição} ($(nb1)+(-0.5,0.2)$);
+\draw[->] ($(api1)+(0.3,-0.2)$) -- node[near start,below,font=\scriptsize]{dados JSON} ($(nb1)-(0.5,0)$);
+\node[cloud,draw,fill=white,cloud puffs=10,cloud puff arc=120,aspect=2,inner ysep=0.5em,right=2.5cm of api1,font=\scriptsize] (cl1) {Internet};
+\end{tikzpicture}
+\caption{Diagrama dos dados lidos pela API e enviados à aplicação}
+\label{fig:api}
+\end{figure}
+
+\section{Biblioteca para tratamento de nomes}
+O bolsista trabalhou em uma biblioteca de reconhecimento de nomes de pessoas baseado nos nomes disponíveis publicamente pelo site da Receita Federal. A primeira parte do trabalho envolveu a criação de uma tabela com todos os nomes e sobrenomes encontrados nos dados coletados. Em seguida foram criados três algoritmos para a análise de nomes.
+
+O primeiro algoritmo é responsável por localizar um nome específico em um texto e analisar se o nome encontrado no texto é exatamente igual ao nome procurado ou se é maior, contendo um segundo sobrenome, por exemplo. O segundo algoritmo traz todos os nomes encontrados a partir de parte do nome e o terceiro traz todos os nomes encontrados em um texto.
+
+A biblioteca desenvolvida poderá ser utilizada pelos robôs na análise de documentos texto, planilhas e página web.
+
+\begin{figure}[h!]
+\centering
+\begin{tikzpicture}[>=stealth,
+  robot/.style={
+    rectangle,
+    fill=white,
+    draw,
+    minimum width=0.5cm,
+    minimum height=0.4cm,
+    path picture={
+	    \fill[black](-0.15,0) rectangle +(0.1, 0.1);
+	    \fill[black](0.05,0) rectangle +(0.1, 0.1);	    
+    }  
+  }
+]
+\node[database] (db3) at (0,0) {Dados da receita};
+\node[database, right=2cm of db3] (db4) {Lista de nomes};
+\node[robot, right=2cm of db4] (rb1) {};
+\draw[->] (db3) -- (db4);
+\end{tikzpicture}
+\caption{Diagrama dos dados lidos pela API e enviados à aplicação}
+\label{fig:biblioteca}
+\end{figure}
+
+\section{Refatoração dos robôs}
+Aqui vem.
+
+\chapter{Conclusão}
+\label{chp:conclusao}
+O bolsista participou da criação de um novo software, que representa um esforço para a análise
+automática de imagens de retina para a deteção da RD. O trabalho do bolsista ajudou a consolidar
+colaborações, divulgar e popularizar o método de segmentação e softwares através de publicações
+e apoio a usuários ocasionais que demonstravam interesse. Essas contribuições são importantes
+para que o software e a linha de pesquisa se desenvolvam, consolidando um ambiente propicio para
+trabalhos futuros, que conta com colaboradores, um software em desenvolvimento, e o ambiente
+da Incubadora Virtual da FAPESP.  O trabalho realizado ajudou a formar o bolsista, ensinando na
+prática as atividades das fases de criação e manutenção de um software em ambiente colaborativo,
+incluindo interação com usuários finais.
+
+A \fomento\ financiou até o momento 4 meses do projeto, previsto para 17 meses, com a Bolsa Concedida como Itens Orçamentários em Auxílios (BCO) de Treinamento Técnico V (TT-V). O apoio financeiro da \fomentoSigla\ tem sido de considerável importância para a realização do projeto de pesquisa.
+
+A empresa \instituicaoSigla\ acolhe a pesquisa e disponibiliza as condições necessárias para
+sua realização com infraestrutura, algoritmos, acesso a Internet, dados coletados e orientação por parte do pesquisador \responsavel , responsável pela pesquisa.
+
+\chapter{Atividades para o próximo período}
+\label{chp:atividades}
+Aqui começa o terceiro capítulo com a descrição \cite{postgresql} \cite{python} \cite{drf} da participação em eventos científicos.
+
+\bibliographystyle{abntex2-num}
+\bibliography{bibliografia}
+
+\end{document}
