@@ -167,11 +167,47 @@
     minimum height=2cm,  
     align=center,    
     draw
+  },
+  robot/.style={
+    rectangle,
+    minimum width=12mm,
+    minimum height=11mm,
+    path picture={
+    		\draw[rounded corners] (-4mm,-5mm) rectangle (4mm,1mm);
+		\draw (2mm,-2mm) circle (1mm);
+		\draw (-2mm,-2mm) circle (1mm);		
+		\draw (0,3mm) circle (1mm);
+		\draw (0,2mm) -- (0,1mm);
+		\draw (-4mm,-0.8mm) arc[radius=1.5mm,start angle=100,end angle=260];
+		\draw (4mm,-0.8mm) arc[radius=1.5mm,start angle=80,end angle=-80];
+    }
+  },
+  docs/.style={
+    rectangle,
+    minimum width=2cm,
+    minimum height=2cm,
+    path picture={
+      \draw[line width=0.9mm] (-2.25mm,7.25mm) --++ (0,1.25mm) --++ (6.5mm,0) --++ (2.5mm,-2.5mm) --++ (0,-10mm) --++ (-1.25mm,0);
+      \fill[black] (3.75mm,8.5mm) --++ (3mm,-3mm) --++ (-3mm,0) -- cycle;
+      \draw[line width=0.9mm] (-4.5mm,5mm) --++ (0,1.25mm) --++ (6.5mm,0) --++ (2.5mm,-2.5mm) --++ (0,-10mm) --++ (-1.25mm,0);
+      \fill[black] (1.5mm,6.25mm) --++ (3mm,-3mm) --++ (-3mm,0) -- cycle;
+      \draw[line width=0.9mm] (-6.75mm,4mm) --++ (6.5mm,0) --++ (2.5mm,-2.5mm) --++ (0,-10mm) --++ (-9mm,0) -- cycle;
+      \fill[black] (-0.75mm,4mm) --++ (3mm,-3mm) --++ (-3mm,0) -- cycle;
+      \foreach \n in {0.25mm, -1.375mm, -3mm, -4.625mm, -6.25mm}{
+    	    \draw[line width=0.75mm, line cap=round] (-5.25mm,\n) -- (0.75mm,\n);
+      }
+    }
   }
 }
 
+
 % Document
 \begin{document}
+
+\begin{tikzpicture}
+\node[docs] (d1) {};
+\end{tikzpicture}
+
 
 \maketitle
 
@@ -205,7 +241,7 @@ Foi desenvolvida uma API \cite{api} utilizando o framework Django \cite{django} 
 
 A utilização da API permite controlar o acesso aos dados através de autenticação e filtros de acordo com o tipo de usuário conectado. Os dados são analisados, calculados e agrupados para cada serviço oferecido e disponibilizados ao cliente no formato JSON \cite{json}.
 
-O bolsista trabalhou em contato com a equipe de desenvolvimento da aplicação que irá consumir os dados enviados pela API, fornecendo suporte e adaptando a saída de dados de acordo com a necessidade da aplicação.
+O bolsista trabalha em contato com a equipe de desenvolvimento da aplicação que irá consumir os dados enviados pela API, fornecendo suporte e adaptando a saída de dados de acordo com a necessidade da aplicação.
 
 % \vspace{\baselineskip}
 
@@ -234,25 +270,21 @@ A biblioteca desenvolvida poderá ser utilizada pelos robôs na análise de docu
 
 \begin{figure}[h!]
 \centering
-\begin{tikzpicture}[>=stealth,
-  robot/.style={
-    rectangle,
-    fill=white,
-    draw,
-    minimum width=0.5cm,
-    minimum height=0.4cm,
-    path picture={
-	    \fill[black](-0.15,0) rectangle +(0.1, 0.1);
-	    \fill[black](0.05,0) rectangle +(0.1, 0.1);	    
-    }  
-  }
-]
-\node[database] (db3) at (0,0) {Dados da receita};
-\node[database, right=2cm of db3] (db4) {Lista de nomes};
-\node[robot, right=2cm of db4] (rb1) {};
-\draw[->] (db3) -- (db4);
+\begin{tikzpicture}[>=stealth]
+\node[database] (db3) at (0,0) {Receita Federal};
+\node[database, right=1.5cm of db3] (db4) {Banco de nomes};
+\node[api, right=1.5cm of db4] (api2) {L I B};
+\node[robot, right=1.5cm of api2, label={[font=\scriptsize,align=center]south:robôs},yshift=-2mm] (rb1) {};
+\node[robot, above=-1mm of rb1] (rb2) {};
+\node[docs, right=1cm of rb1,yshift=2mm,label={[font=\scriptsize,align=center,yshift=2mm]south:documentos}] (doc1) {};
+\draw[->] (db3) -- node[midway,above,font=\scriptsize]{dados} node[midway,below,font=\scriptsize]{tratados} (db4);
+\draw[->] (db4) -- node[midway,above,font=\scriptsize]{nomes} (api2);
+\draw[->] ($(api2)+(3mm,-2mm)$) -- node[midway,above,font=\scriptsize,sloped]{} ($(rb1)-(4mm,0)$);
+\draw[->] ($(api2)+(3mm,4mm)$) -- node[midway,above,font=\scriptsize,sloped]{consulta} ($(rb2)-(4mm,4mm)$);
+\draw[<-] ($(rb1)+(4mm,0)$) -- node[midway,above,font=\scriptsize]{} ($(doc1)-(7mm,2mm)$);
+\draw[<-] ($(rb2)+(4mm,-4mm)$) -- node[midway,above,font=\scriptsize,sloped]{análise} ($(doc1)-(7mm,-4mm)$);
 \end{tikzpicture}
-\caption{Diagrama dos dados lidos pela API e enviados à aplicação}
+\caption{Biblioteca de nomes auxilia na busca dos robôs}
 \label{fig:biblioteca}
 \end{figure}
 
